@@ -1,0 +1,56 @@
+<!-- Header -->
+<header class="relative overflow-hidden border-b border-border bg-bg-secondary">
+  <!-- Background glow effect -->
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-f1-red/10 blur-3xl rounded-full pointer-events-none"></div>
+
+  <div class="relative max-w-6xl mx-auto px-4 pt-6 pb-0">
+    <!-- Logo / Title -->
+    <div class="text-center mb-6">
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight">
+        <span class="text-gradient-red">F1</span>
+        <span class="text-text-primary"> Fantasy</span>
+      </h1>
+      <p class="text-text-secondary text-sm mt-1 font-light tracking-wide">
+        Liga de Fantasy &bull; Temporada 2026
+      </p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="flex justify-center gap-1 md:gap-2">
+      @for (tab of tabs; track tab.id) {
+        <button
+          (click)="setTab(tab.id)"
+          [class]="'relative px-4 md:px-6 py-3 rounded-t-xl text-sm md:text-base font-semibold transition-all duration-300 cursor-pointer ' +
+            (activeTab() === tab.id
+              ? 'bg-bg-primary text-text-primary border-t-2 border-x border-t-f1-red border-x-border'
+              : 'text-text-secondary hover:text-text-primary hover:bg-bg-primary/50')"
+        >
+          <span class="mr-1.5">{{ tab.icon }}</span>
+          <span class="hidden sm:inline">{{ tab.label }}</span>
+        </button>
+      }
+    </nav>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto px-4 py-6 md:py-8 min-h-[calc(100vh-140px)]">
+  @switch (activeTab()) {
+    @case ('participants') {
+      <app-participants class="animate-fade-in block" />
+    }
+    @case ('races') {
+      <app-race-results class="animate-fade-in block" />
+    }
+    @case ('leaderboard') {
+      <app-leaderboard class="animate-fade-in block" />
+    }
+  }
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-border py-4 text-center">
+  <p class="text-text-muted text-xs tracking-wider">
+    F1 FANTASY &bull; 2026
+  </p>
+</footer>

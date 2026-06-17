@@ -1,0 +1,117 @@
+<div class="space-y-8 animate-fade-in">
+  
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-6">
+    <div class="w-12 h-12 rounded-full bg-bg-card border border-border flex items-center justify-center text-2xl shadow-lg">
+      👥
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold text-text-primary">Participantes</h2>
+      <p class="text-sm text-text-secondary">Añade participantes y selecciona 4 pilotos por cada uno.</p>
+    </div>
+  </div>
+
+  <!-- Add Participant Form -->
+  <div class="glass p-6 rounded-2xl animate-slide-up">
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-text-secondary mb-2">Nombre del Participante</label>
+      <input 
+        type="text" 
+        [ngModel]="newName()" 
+        (ngModelChange)="newName.set($event)"
+        placeholder="Ej. Juan Pérez"
+        class="w-full md:w-1/2 bg-bg-input border border-border rounded-xl px-4 py-3 text-text-primary focus:outline-none focus:border-f1-red transition-colors"
+      >
+    </div>
+
+    <div class="mb-4 flex justify-between items-end">
+      <label class="block text-sm font-medium text-text-secondary">Selecciona 4 Pilotos</label>
+      <span class="text-xs font-bold px-3 py-1 rounded-full" 
+            [class.bg-bg-input]="selectedDriverIds().length < 4" 
+            [class.text-text-muted]="selectedDriverIds().length < 4"
+            [class.bg-f1-red]="selectedDriverIds().length === 4"
+            [class.text-white]="selectedDriverIds().length === 4">
+        {{ selectedDriverIds().length }}/4 Seleccionados
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      @for (driver of drivers; track driver.id) {
+        <button 
+          (click)="toggleDriver(driver.id)"
+          class="relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-300"
+          [class.border-border]="!isDriverSelected(driver.id)"
+          [class.bg-bg-input]="!isDriverSelected(driver.id)"
+          [class.hover:border-text-muted]="!isDriverSelected(driver.id)"
+          [class.border-f1-red]="isDriverSelected(driver.id)"
+          [class.bg-f1-red]="isDriverSelected(driver.id)"
+          [class.bg-opacity-10]="isDriverSelected(driver.id)"
+          [class.shadow-[0_0_15px_rgba(225,6,0,0.15)]]="isDriverSelected(driver.id)"
+        >
+          <div class="w-3 h-3 rounded-full shrink-0" [style.backgroundColor]="driver.teamColor"></div>
+          <div class="overflow-hidden">
+            <div class="text-sm font-bold truncate text-text-primary">{{ driver.name }}</div>
+            <div class="text-xs truncate text-text-muted">{{ driver.team }}</div>
+          </div>
+          
+        </button>
+      }
+    </div>
+
+    <div class="flex justify-end mt-6">
+      <button 
+        (click)="addParticipant()"
+        [disabled]="!newName().trim() || selectedDriverIds().length !== 4"
+        class="bg-gradient-red text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(225,6,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+      >
+        Confirmar Selección
+      </button>
+    </div>
+  </div>
+
+  <!-- Participants List -->
+  <div class="mt-8">
+    <h3 class="text-xl font-bold text-text-primary mb-4">Participantes Confirmados</h3>
+    
+    @if (participants().length === 0) {
+      <div class="glass p-12 rounded-2xl text-center text-text-muted border-dashed border-2 border-border">
+        No hay participantes aún. Añade uno arriba.
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        @for (participant of participants(); track participant.id) {
+          <div class="glass p-5 rounded-2xl flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between group animate-slide-up">
+            <div class="flex items-center gap-3">
+              <div class="text-2xl">👤</div>
+              <div>
+                <div class="font-bold text-lg text-text-primary flex items-center gap-2">
+                  {{ participant.name }} <span class="text-xs text-text-muted">🔒</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex-1 flex flex-wrap gap-2 justify-start sm:justify-end">
+              @for (driverId of participant.driverIds; track driverId) {
+                @if (getDriverById(driverId); as driver) {
+                  <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bg-input border border-border text-xs text-text-secondary">
+                    <div class="w-2 h-2 rounded-full" [style.backgroundColor]="driver.teamColor"></div>
+                    <span class="truncate max-w-[80px]" title="{{ driver.name }}">{{ driver.name }}</span>
+                  </div>
+                }
+              }
+            </div>
+
+            <button 
+              (click)="removeParticipant(participant.id)"
+              class="w-10 h-10 shrink-0 rounded-xl bg-bg-input border border-border flex items-center justify-center text-text-muted hover:text-f1-red hover:border-f1-red transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100"
+              title="Eliminar participante"
+            >
+              🗑️
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>

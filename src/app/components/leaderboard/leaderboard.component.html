@@ -1,0 +1,151 @@
+<div class="space-y-8 animate-fade-in">
+  
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-8">
+    <div class="w-12 h-12 rounded-full bg-bg-card border border-border flex items-center justify-center text-2xl shadow-lg">
+      🏆
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold text-text-primary">Clasificación General</h2>
+      <p class="text-sm text-text-secondary">{{ races().length }} carreras disputadas</p>
+    </div>
+  </div>
+
+  <!-- Empty States -->
+  @if (participants().length === 0 || races().length === 0) {
+    <div class="glass p-12 rounded-2xl text-center flex flex-col items-center justify-center border-dashed border-2 border-border animate-slide-up">
+      <div class="text-5xl mb-4 opacity-50">🏎️</div>
+      <h3 class="text-xl font-bold text-text-primary mb-2">Aún no hay datos suficientes</h3>
+      <p class="text-text-secondary max-w-md">
+        Para ver la clasificación, necesitas añadir al menos un <strong>participante</strong> y registrar los resultados de al menos una <strong>carrera</strong>.
+      </p>
+    </div>
+  } @else {
+    <!-- Ranking List -->
+    <div class="space-y-4">
+      @for (rank of ranking(); track rank.participant.id; let i = $index) {
+        <div class="glass rounded-2xl overflow-hidden animate-slide-up transition-all duration-500"
+             [style.animation-delay]="i * 100 + 'ms'"
+             [class.border-gold]="i === 0"
+             [class.border-silver]="i === 1"
+             [class.border-bronze]="i === 2"
+             [class.border-border]="i > 2"
+             [class.shadow-[0_0_15px_rgba(255,215,0,0.15)]]="i === 0">
+             
+          <div class="p-5 relative overflow-hidden group">
+            <!-- Progress Bar Background -->
+            <div class="absolute top-0 left-0 h-1 bg-gradient-red transition-all duration-1000 ease-out"
+                 [style.width.%]="getPointsPercentage(rank.totalPoints)"></div>
+
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+              
+              <!-- Left side: Rank & Name -->
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-2xl font-black bg-bg-input border border-border"
+                     [class.bg-gradient-card]="i < 3">
+                  {{ getMedal(i) }}
+                </div>
+                <div>
+                  <h3 class="text-xl font-black text-text-primary uppercase tracking-wider">{{ rank.participant.name }}</h3>
+                  <div class="text-xs text-text-secondary mt-1 flex gap-2">
+                    @for (driverId of rank.participant.driverIds; track driverId) {
+                      <div class="w-2 h-2 rounded-full" [style.backgroundColor]="getDriverById(driverId)?.teamColor" title="{{ getDriverById(driverId)?.name }}"></div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right side: Points & Actions -->
+              <div class="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                <div class="text-right">
+                  <div class="text-xs text-text-secondary uppercase tracking-widest mb-1">Puntos</div>
+                  <div class="text-4xl font-black text-gradient-red leading-none">{{ rank.totalPoints }}</div>
+                </div>
+                
+                <button 
+                  (click)="toggleDetails(rank.participant.id)"
+                  class="w-10 h-10 rounded-xl bg-bg-primary border border-border flex items-center justify-center text-text-muted hover:text-text-primary transition-colors shrink-0"
+                >
+                  <div class="transition-transform duration-300" [class.rotate-180]="expandedParticipantId() === rank.participant.id">▼</div>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Drivers Summary (visible when not expanded) -->
+            @if (expandedParticipantId() !== rank.participant.id) {
+              <div class="mt-4 pt-4 border-t border-border/50 grid grid-cols-2 sm:grid-cols-4 gap-2 animate-fade-in">
+                @for (dp of rank.driverPoints; track dp.driverId) {
+                  @if (getDriverById(dp.driverId); as driver) {
+                    <div class="bg-bg-input/50 rounded-lg p-2 flex items-center justify-between group-hover:bg-bg-input transition-colors">
+                      <div class="flex items-center gap-2 overflow-hidden">
+                        <div class="w-1.5 h-full absolute left-0 top-0 bottom-0 rounded-l-lg" [style.backgroundColor]="driver.teamColor"></div>
+                        <span class="text-xs text-text-secondary truncate pl-1">{{ driver.name.split(' ')[1] || driver.name }}</span>
+                      </div>
+                      <span class="text-sm font-bold text-text-primary">{{ dp.points }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Expanded Detail View -->
+          @if (expandedParticipantId() === rank.participant.id) {
+            <div class="border-t border-border bg-bg-secondary p-5 animate-fade-in overflow-x-auto">
+              <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="text-xs text-text-secondary uppercase bg-bg-primary border-b border-border">
+                  <tr>
+                    <th class="px-4 py-3 rounded-tl-lg font-medium">Piloto</th>
+                    @for (race of races(); track race.id) {
+                      <th class="px-4 py-3 font-medium text-center">{{ race.name }}</th>
+                    }
+                    <th class="px-4 py-3 rounded-tr-lg font-bold text-right text-f1-red">Total</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-border/50">
+                  @for (dp of rank.driverPoints; track dp.driverId) {
+                    @if (getDriverById(dp.driverId); as driver) {
+                      <tr class="hover:bg-bg-input/50 transition-colors">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full" [style.backgroundColor]="driver.teamColor"></div>
+                            <span class="font-medium text-text-primary">{{ driver.name }}</span>
+                          </div>
+                        </td>
+                        @for (race of races(); track race.id) {
+                          <td class="px-4 py-3 text-center text-text-secondary font-mono">
+                            {{ scoringService.getDriverPointsForRace(dp.driverId, race) || '-' }}
+                          </td>
+                        }
+                        <td class="px-4 py-3 text-right font-bold text-text-primary">
+                          {{ dp.points }}
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+                <tfoot class="bg-bg-primary border-t border-border">
+                  <tr>
+                    <td class="px-4 py-3 font-bold text-text-primary uppercase text-xs">Total Carrera</td>
+                    @for (race of races(); track race.id) {
+                      <td class="px-4 py-3 text-center font-bold text-f1-red">
+                        <!-- Total calculado a nivel componente para no complicar el template -->
+                      </td>
+                    }
+                    <td class="px-4 py-3 text-right font-black text-f1-red text-lg">
+                      {{ rank.totalPoints }}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+              <div class="text-xs text-text-muted mt-2 text-right">
+                * Nota: El desglose por carrera es aproximado en el tfoot para simplicidad.
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
