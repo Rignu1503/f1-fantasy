@@ -149,6 +149,6 @@ export class RaceResultsComponent implements OnInit {
   }
   
   getPositionsArray(): number[] {
-    return Array.from({length: 20}, (_, i) => i + 1);
+    return Array.from({length: 22}, (_, i) => i + 1);
   }
 }
