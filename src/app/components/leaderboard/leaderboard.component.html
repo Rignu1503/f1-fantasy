@@ -115,7 +115,14 @@
                         </td>
                         @for (race of races(); track race.id) {
                           <td class="px-4 py-3 text-center text-text-secondary font-mono">
-                            {{ scoringService.getDriverPointsForRace(dp.driverId, race) || '-' }}
+                            @if (getDriverRaceResult(dp.driverId, race); as result) {
+                              <div class="flex flex-col items-center">
+                                <span>{{ result.points || '-' }}</span>
+                                @if (result.penalties && result.penalties.length > 0) {
+                                  <span class="text-[10px] text-danger mt-0.5 leading-tight">{{ getPenaltyLabels(result.penalties) }}</span>
+                                }
+                              </div>
+                            }
                           </td>
                         }
                         <td class="px-4 py-3 text-right font-bold text-text-primary">

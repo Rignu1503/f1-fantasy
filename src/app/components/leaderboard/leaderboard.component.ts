@@ -67,10 +67,24 @@ export class LeaderboardComponent implements OnInit {
     }
   }
 
-  getDriverPointsByRace(driverId: string): { raceName: string; points: number }[] {
-    return this.races().map(race => ({
-      raceName: race.name,
-      points: this.scoringService.getDriverPointsForRace(driverId, race)
-    }));
+  getDriverRaceResult(driverId: string, race: Race): { points: number; penalties?: string[] } {
+    const result = race.results.find(r => r.driverId === driverId);
+    return {
+      points: this.scoringService.getDriverPointsForRace(driverId, race),
+      penalties: result?.penalties
+    };
+  }
+
+  getPenaltyLabels(penaltyIds: string[] | undefined): string {
+    if (!penaltyIds || penaltyIds.length === 0) return '';
+    const labels: Record<string, string> = {
+      '5s': '5s',
+      '10s': '10s',
+      '20s': '20s',
+      'monetary': 'Multa',
+      'stop-and-go': 'Stop & Go',
+      'dsquared': 'DSQ'
+    };
+    return penaltyIds.map(id => labels[id] || id).join(', ');
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Race, Participant, RankedParticipant } from '../models';
+import { Race, Participant, RankedParticipant, RaceResult } from '../models';
 
 const POINTS_MAP: Record<number, number> = {
   1: 30,
@@ -26,6 +26,15 @@ const POINTS_MAP: Record<number, number> = {
   22: 1,
 };
 
+const PENALTY_POINTS: Record<string, number> = {
+  '5s': -7,
+  '10s': -10,
+  '20s': -15,
+  'monetary': -3,
+  'stop-and-go': -7,
+  'dsquared': -30
+};
+
 @Injectable({
   providedIn: 'root',
 })
@@ -36,8 +45,20 @@ export class ScoringService {
 
   getDriverPointsForRace(driverId: string, race: Race): number {
     const result = race.results.find((r) => r.driverId === driverId);
-    if (!result || result.position === 0) return 0;
-    return this.getPointsForPosition(result.position);
+    if (!result) return 0;
+    
+    let points = 0;
+    if (result.position > 0) {
+      points += this.getPointsForPosition(result.position);
+    }
+    
+    if (result.penalties && result.penalties.length > 0) {
+      result.penalties.forEach(p => {
+        points += (PENALTY_POINTS[p] ?? 0);
+      });
+    }
+    
+    return points;
   }
 
   getDriverTotalPoints(driverId: string, races: Race[]): number {

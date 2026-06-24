@@ -15,6 +15,7 @@ export interface Participant {
 export interface RaceResult {
   driverId: string;
   position: number; // 1-20, 0 = DNF
+  penalties?: string[];
 }
 
 export interface Race {
