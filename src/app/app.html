@@ -1,13 +1,46 @@
-<!-- Header -->
 <header class="relative overflow-hidden border-b border-border bg-bg-secondary">
   <!-- Background glow effect -->
-  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 bg-f1-red/10 blur-3xl rounded-full pointer-events-none"></div>
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-32 blur-3xl rounded-full pointer-events-none transition-colors duration-500 opacity-10"
+       [class.bg-f1-red]="activeLeague() === 'F1'"
+       [class.bg-[#0033A0]]="activeLeague() === 'NASCAR'"></div>
 
-  <div class="relative max-w-6xl mx-auto px-4 pt-6 pb-0">
+  <div class="relative max-w-6xl mx-auto px-4 pt-4 pb-0">
+    <!-- League Toggle -->
+    <div class="flex justify-center mb-4 relative z-10">
+      <div class="bg-bg-input p-1 rounded-xl flex items-center border border-border">
+        <button (click)="setLeague('F1')" 
+                class="px-6 py-1.5 rounded-lg text-sm font-bold transition-all"
+                [class.bg-bg-primary]="activeLeague() === 'F1'"
+                [class.text-text-primary]="activeLeague() === 'F1'"
+                [class.shadow-md]="activeLeague() === 'F1'"
+                [class.border-f1-red]="activeLeague() === 'F1'"
+                [class.border]="activeLeague() === 'F1'"
+                [class.border-transparent]="activeLeague() !== 'F1'"
+                [class.text-text-muted]="activeLeague() !== 'F1'">
+          F1
+        </button>
+        <button (click)="setLeague('NASCAR')" 
+                class="px-6 py-1.5 rounded-lg text-sm font-bold transition-all"
+                [class.bg-bg-primary]="activeLeague() === 'NASCAR'"
+                [class.text-text-primary]="activeLeague() === 'NASCAR'"
+                [class.shadow-md]="activeLeague() === 'NASCAR'"
+                [class.border-[#0033A0]]="activeLeague() === 'NASCAR'"
+                [class.border]="activeLeague() === 'NASCAR'"
+                [class.border-transparent]="activeLeague() !== 'NASCAR'"
+                [class.text-text-muted]="activeLeague() !== 'NASCAR'">
+          NASCAR
+        </button>
+      </div>
+    </div>
+
     <!-- Logo / Title -->
     <div class="text-center mb-6">
       <h1 class="text-4xl md:text-5xl font-black tracking-tight">
-        <span class="text-gradient-red">F1</span>
+        @if (activeLeague() === 'F1') {
+          <span class="text-gradient-red">F1</span>
+        } @else {
+          <span class="bg-gradient-to-r from-[#0033A0] to-[#EB0A1E] text-transparent bg-clip-text">NASCAR</span>
+        }
         <span class="text-text-primary"> Fantasy</span>
       </h1>
       <p class="text-text-secondary text-sm mt-1 font-light tracking-wide">

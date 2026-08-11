@@ -1,8 +1,10 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
 import { ScoringService } from '../../services/scoring.service';
-import { DRIVERS } from '../../data/drivers.data';
+import { LeagueService } from '../../services/league.service';
+import { DRIVERS as F1_DRIVERS } from '../../data/drivers.data';
+import { NASCAR_DRIVERS } from '../../data/nascar.data';
 import { Participant, Race, RankedParticipant, Driver } from '../../models';
 
 @Component({
@@ -17,7 +19,11 @@ export class LeaderboardComponent implements OnInit {
   races = signal<Race[]>([]);
   expandedParticipantId = signal<string | null>(null);
 
-  drivers = DRIVERS;
+  private storageService = inject(StorageService);
+  public scoringService = inject(ScoringService);
+  private leagueService = inject(LeagueService);
+
+  drivers = computed(() => this.leagueService.activeLeague() === 'F1' ? F1_DRIVERS : NASCAR_DRIVERS);
 
   ranking = computed(() => {
     return this.scoringService.getRanking(this.participants(), this.races());
@@ -28,22 +34,20 @@ export class LeaderboardComponent implements OnInit {
     return ranks.length > 0 ? ranks[0].totalPoints : 0;
   });
 
-  constructor(
-    private storageService: StorageService,
-    public scoringService: ScoringService
-  ) {}
-
-  ngOnInit(): void {
-    this.refresh();
+  constructor() {
+    effect(() => {
+      const league = this.leagueService.activeLeague();
+      this.participants.set(this.storageService.loadParticipants(league));
+      this.races.set(this.storageService.loadRaces(league));
+      this.expandedParticipantId.set(null);
+    });
   }
 
-  refresh(): void {
-    this.participants.set(this.storageService.loadParticipants());
-    this.races.set(this.storageService.loadRaces());
+  ngOnInit(): void {
   }
 
   getDriverById(id: string): Driver | undefined {
-    return this.drivers.find(d => d.id === id);
+    return this.drivers().find(d => d.id === id);
   }
 
   getMedal(index: number): string {

@@ -1,8 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
-import { DRIVERS } from '../../data/drivers.data';
+import { LeagueService } from '../../services/league.service';
+import { DRIVERS as F1_DRIVERS } from '../../data/drivers.data';
+import { NASCAR_DRIVERS } from '../../data/nascar.data';
 import { Race, RaceResult } from '../../models';
 
 @Component({
@@ -33,13 +35,21 @@ export class RaceResultsComponent implements OnInit {
     { id: 'dsquared', label: 'DSQ (-30 pts)' }
   ];
 
-  drivers = DRIVERS;
+  private storageService = inject(StorageService);
+  private leagueService = inject(LeagueService);
 
-  constructor(private storageService: StorageService) {}
+  drivers = computed(() => this.leagueService.activeLeague() === 'F1' ? F1_DRIVERS : NASCAR_DRIVERS);
+
+  constructor() {
+    effect(() => {
+      const league = this.leagueService.activeLeague();
+      this.races.set(this.storageService.loadRaces(league));
+      this.showForm.set(false);
+      this.initPositions();
+    });
+  }
 
   ngOnInit(): void {
-    this.races.set(this.storageService.loadRaces());
-    this.initPositions();
     const today = new Date().toISOString().split('T')[0];
     this.raceDate.set(today);
   }
@@ -47,7 +57,7 @@ export class RaceResultsComponent implements OnInit {
   initPositions(): void {
     const pos: Record<string, number> = {};
     const pens: Record<string, string[]> = {};
-    this.drivers.forEach(d => {
+    this.drivers().forEach(d => {
       pos[d.id] = -1; // -1 means unset
       pens[d.id] = [];
     });
@@ -149,7 +159,7 @@ export class RaceResultsComponent implements OnInit {
     }
 
     this.races.set(updated);
-    this.storageService.saveRaces(updated);
+    this.storageService.saveRaces(this.leagueService.activeLeague(), updated);
 
     this.resetForm();
     setTimeout(() => this.savedMessage.set(''), 3000);
@@ -181,7 +191,7 @@ export class RaceResultsComponent implements OnInit {
     
     const pos: Record<string, number> = {};
     const pens: Record<string, string[]> = {};
-    this.drivers.forEach(d => {
+    this.drivers().forEach(d => {
       pos[d.id] = -1;
       pens[d.id] = [];
     });
@@ -200,7 +210,7 @@ export class RaceResultsComponent implements OnInit {
   clearAllRaces(): void {
     if (confirm('¿Estás seguro de eliminar TODOS los resultados de carreras? Esta acción no se puede deshacer.')) {
       this.races.set([]);
-      this.storageService.saveRaces([]);
+      this.storageService.saveRaces(this.leagueService.activeLeague(), []);
       this.expandedRaceId.set(null);
     }
   }
@@ -209,7 +219,7 @@ export class RaceResultsComponent implements OnInit {
     if (confirm('¿Estás seguro de eliminar los resultados de esta carrera?')) {
       const updated = this.races().filter(r => r.id !== id);
       this.races.set(updated);
-      this.storageService.saveRaces(updated);
+      this.storageService.saveRaces(this.leagueService.activeLeague(), updated);
       if (this.expandedRaceId() === id) this.expandedRaceId.set(null);
     }
   }
@@ -223,11 +233,11 @@ export class RaceResultsComponent implements OnInit {
   }
 
   getDriverName(driverId: string): string {
-    return this.drivers.find(d => d.id === driverId)?.name || 'Desconocido';
+    return this.drivers().find(d => d.id === driverId)?.name || 'Desconocido';
   }
 
   getDriverTeamColor(driverId: string): string {
-    return this.drivers.find(d => d.id === driverId)?.teamColor || '#ffffff';
+    return this.drivers().find(d => d.id === driverId)?.teamColor || '#ffffff';
   }
 
   getPositionLabel(position: number): string {
@@ -237,7 +247,7 @@ export class RaceResultsComponent implements OnInit {
   }
   
   getPositionsArray(): number[] {
-    return Array.from({length: 22}, (_, i) => i + 1);
+    return Array.from({length: this.drivers().length}, (_, i) => i + 1);
   }
 
   getPenaltyLabels(penaltyIds: string[] | undefined): string {

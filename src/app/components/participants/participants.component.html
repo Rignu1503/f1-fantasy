@@ -36,7 +36,7 @@
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-      @for (driver of drivers; track driver.id) {
+      @for (driver of drivers(); track driver.id) {
         <button 
           (click)="toggleDriver(driver.id)"
           class="relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-300"

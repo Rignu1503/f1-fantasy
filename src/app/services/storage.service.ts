@@ -1,28 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Participant, Race } from '../models';
-
-const PARTICIPANTS_KEY = 'f1fantasy_participants';
-const RACES_KEY = 'f1fantasy_races';
+import { League } from './league.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StorageService {
-  saveParticipants(participants: Participant[]): void {
-    localStorage.setItem(PARTICIPANTS_KEY, JSON.stringify(participants));
+  private getPrefix(league: League): string {
+    return league === 'F1' ? 'f1fantasy' : 'nascarfantasy';
   }
 
-  loadParticipants(): Participant[] {
-    const data = localStorage.getItem(PARTICIPANTS_KEY);
+  saveParticipants(league: League, participants: Participant[]): void {
+    localStorage.setItem(`${this.getPrefix(league)}_participants`, JSON.stringify(participants));
+  }
+
+  loadParticipants(league: League): Participant[] {
+    const data = localStorage.getItem(`${this.getPrefix(league)}_participants`);
     return data ? JSON.parse(data) : [];
   }
 
-  saveRaces(races: Race[]): void {
-    localStorage.setItem(RACES_KEY, JSON.stringify(races));
+  saveRaces(league: League, races: Race[]): void {
+    localStorage.setItem(`${this.getPrefix(league)}_races`, JSON.stringify(races));
   }
 
-  loadRaces(): Race[] {
-    const data = localStorage.getItem(RACES_KEY);
+  loadRaces(league: League): Race[] {
+    const data = localStorage.getItem(`${this.getPrefix(league)}_races`);
     return data ? JSON.parse(data) : [];
   }
 }

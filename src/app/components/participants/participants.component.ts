@@ -1,8 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StorageService } from '../../services/storage.service';
-import { DRIVERS } from '../../data/drivers.data';
+import { LeagueService } from '../../services/league.service';
+import { DRIVERS as F1_DRIVERS } from '../../data/drivers.data';
+import { NASCAR_DRIVERS } from '../../data/nascar.data';
 import { Participant, Driver } from '../../models';
 
 @Component({
@@ -17,16 +19,24 @@ export class ParticipantsComponent implements OnInit {
   newName = signal<string>('');
   selectedDriverIds = signal<string[]>([]);
   
-  drivers = DRIVERS;
+  private storageService = inject(StorageService);
+  private leagueService = inject(LeagueService);
 
-  constructor(private storageService: StorageService) {}
+  drivers = computed(() => this.leagueService.activeLeague() === 'F1' ? F1_DRIVERS : NASCAR_DRIVERS);
+
+  constructor() {
+    effect(() => {
+      const league = this.leagueService.activeLeague();
+      this.participants.set(this.storageService.loadParticipants(league));
+      this.selectedDriverIds.set([]); // Limpiar selección al cambiar de liga
+    });
+  }
 
   ngOnInit(): void {
-    this.participants.set(this.storageService.loadParticipants());
   }
 
   getDriverById(id: string): Driver | undefined {
-    return this.drivers.find(d => d.id === id);
+    return this.drivers().find(d => d.id === id);
   }
 
   isDriverSelected(driverId: string): boolean {
@@ -66,7 +76,7 @@ export class ParticipantsComponent implements OnInit {
 
     const updated = [...this.participants(), newParticipant];
     this.participants.set(updated);
-    this.storageService.saveParticipants(updated);
+    this.storageService.saveParticipants(this.leagueService.activeLeague(), updated);
     
     this.newName.set('');
     this.selectedDriverIds.set([]);
@@ -76,7 +86,7 @@ export class ParticipantsComponent implements OnInit {
     if (confirm('¿Estás seguro de eliminar este participante?')) {
       const updated = this.participants().filter(p => p.id !== id);
       this.participants.set(updated);
-      this.storageService.saveParticipants(updated);
+      this.storageService.saveParticipants(this.leagueService.activeLeague(), updated);
     }
   }
 }
