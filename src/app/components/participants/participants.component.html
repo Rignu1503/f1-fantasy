@@ -7,7 +7,7 @@
     </div>
     <div>
       <h2 class="text-2xl font-bold text-text-primary">Participantes</h2>
-      <p class="text-sm text-text-secondary">Añade participantes y selecciona 4 pilotos por cada uno.</p>
+      <p class="text-sm text-text-secondary">Añade participantes y selecciona {{ maxDrivers() }} pilotos por cada uno.</p>
     </div>
   </div>
 
@@ -25,13 +25,13 @@
     </div>
 
     <div class="mb-4 flex justify-between items-end">
-      <label class="block text-sm font-medium text-text-secondary">Selecciona 4 Pilotos</label>
+      <label class="block text-sm font-medium text-text-secondary">Selecciona {{ maxDrivers() }} Pilotos</label>
       <span class="text-xs font-bold px-3 py-1 rounded-full" 
-            [class.bg-bg-input]="selectedDriverIds().length < 4" 
-            [class.text-text-muted]="selectedDriverIds().length < 4"
-            [class.bg-f1-red]="selectedDriverIds().length === 4"
-            [class.text-white]="selectedDriverIds().length === 4">
-        {{ selectedDriverIds().length }}/4 Seleccionados
+            [class.bg-bg-input]="selectedDriverIds().length < maxDrivers()" 
+            [class.text-text-muted]="selectedDriverIds().length < maxDrivers()"
+            [class.bg-f1-red]="selectedDriverIds().length === maxDrivers()"
+            [class.text-white]="selectedDriverIds().length === maxDrivers()">
+        {{ selectedDriverIds().length }}/{{ maxDrivers() }} Seleccionados
       </span>
     </div>
 
@@ -61,7 +61,7 @@
     <div class="flex justify-end mt-6">
       <button 
         (click)="addParticipant()"
-        [disabled]="!newName().trim() || selectedDriverIds().length !== 4"
+        [disabled]="!newName().trim() || selectedDriverIds().length !== maxDrivers()"
         class="bg-gradient-red text-white font-bold py-3 px-8 rounded-xl transition-all duration-300 hover:shadow-[0_0_20px_rgba(225,6,0,0.4)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
       >
         Confirmar Selección

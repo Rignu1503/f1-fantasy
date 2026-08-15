@@ -23,6 +23,7 @@ export class ParticipantsComponent implements OnInit {
   private leagueService = inject(LeagueService);
 
   drivers = computed(() => this.leagueService.activeLeague() === 'F1' ? F1_DRIVERS : NASCAR_DRIVERS);
+  maxDrivers = computed(() => this.leagueService.maxDrivers());
 
   constructor() {
     effect(() => {
@@ -53,14 +54,14 @@ export class ParticipantsComponent implements OnInit {
     const current = this.selectedDriverIds();
     if (current.includes(driverId)) {
       this.selectedDriverIds.set(current.filter(id => id !== driverId));
-    } else if (current.length < 4) {
+    } else if (current.length < this.maxDrivers()) {
       this.selectedDriverIds.set([...current, driverId]);
     }
   }
 
   addParticipant(): void {
     const name = this.newName().trim();
-    if (!name || this.selectedDriverIds().length !== 4) return;
+    if (!name || this.selectedDriverIds().length !== this.maxDrivers()) return;
     
     if (this.participants().some(p => p.name.toLowerCase() === name.toLowerCase())) {
       alert('Ya existe un participante con ese nombre');
