@@ -36,10 +36,11 @@ export const NASCAR_DRIVERS: Driver[] = [
   { id: 'reddick', name: 'Tyler Reddick', team: '23XI Racing', teamColor: '#EB0A1E' },
   { id: 'wallace', name: 'Bubba Wallace', team: '23XI Racing', teamColor: '#EB0A1E' },
   { id: 'herbst', name: 'Riley Herbst', team: '23XI Racing', teamColor: '#EB0A1E' },
+  { id: 'corey', name: 'Corey Heim', team: '23XI Racing', teamColor: '#EB0A1E' },
   { id: 'gibbs', name: 'Ty Gibbs', team: 'Joe Gibbs Racing', teamColor: '#EB0A1E' },
   { id: 'briscoe', name: 'Chase Briscoe', team: 'Joe Gibbs Racing', teamColor: '#EB0A1E' },
   { id: 'bell', name: 'Christopher Bell', team: 'Joe Gibbs Racing', teamColor: '#EB0A1E' },
   { id: 'hamlin', name: 'Denny Hamlin', team: 'Joe Gibbs Racing', teamColor: '#EB0A1E' },
   { id: 'jones', name: 'Erik Jones', team: 'Legacy Motor Club', teamColor: '#EB0A1E' },
-  { id: 'nemechek', name: 'John H. Nemechek', team: 'Legacy Motor Club', teamColor: '#EB0A1E' }
+  { id: 'nemechek', name: 'John H. Nemechek', team: 'Legacy Motor Club', teamColor: '#EB0A1E' },
 ];
